@@ -1,0 +1,7 @@
+WETH9/=lib/WETH9-Solidity-0.8.6/
+@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/
+@uniswap/v2-periphery/contracts/=lib/v2-periphery/contracts/
+@xaya/democrit-evm/contracts/=lib/democrit-evm/contracts/
+@xaya/eth-account-registry/contracts/=lib/polygon-contract/contracts/
+@xaya/eth-delegator-contract/contracts/=lib/delegation-contract/contracts/
+@xaya/wchi/contracts/=lib/wchi/contracts/

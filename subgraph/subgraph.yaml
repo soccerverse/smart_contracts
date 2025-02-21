@@ -1,0 +1,74 @@
+specVersion: 0.0.5
+schema:
+  file: ../lib/democrit-evm/subgraph/schema.graphql
+dataSources:
+  - kind: ethereum
+    name: DemocritSoccerverse
+    network: matic
+    source:
+      abi: Democrit
+      address: "0xEB265D9fBb05641266366F15EcE76a268EF4a2A4"
+      startBlock: 66186618
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Trade
+        - Vault
+        - SellOrder
+      abis:
+        - name: Democrit
+          file: ../out/Democrit.sol/Democrit.json
+      eventHandlers:
+        - event: Trade(string,uint256,uint256,string,string)
+          handler: handleTrade
+        - event: SellOrderCreated(uint256,uint256,address,string,string,uint256,uint256)
+          handler: handleSellOrderCreated
+        - event: SellOrderUpdated(uint256,uint256,uint256)
+          handler: handleSellOrderUpdated
+        - event: SellOrderRemoved(uint256)
+          handler: handleSellOrderRemoved
+        - event: PoolCreated(uint256,string,string,string,uint256,uint64)
+          handler: handlePoolCreated
+        - event: PoolUpdated(uint256,uint256)
+          handler: handlePoolUpdated
+        - event: PoolRemoved(uint256)
+          handler: handlePoolRemoved
+        - event: SellDepositCreated(uint256,string,string,uint256)
+          handler: handleDepositCreated
+        - event: SellDepositUpdated(uint256,uint256)
+          handler: handleDepositUpdated
+        - event: SellDepositRemoved(uint256)
+          handler: handleDepositRemoved
+        - event: BuyOrderCreated(uint256,uint256,address,string,string,uint256,uint256)
+          handler: handleBuyOrderCreated
+        - event: BuyOrderUpdated(uint256,uint256,uint256)
+          handler: handleBuyOrderUpdated
+        - event: BuyOrderRemoved(uint256)
+          handler: handleBuyOrderRemoved
+      file: ../lib/democrit-evm/subgraph/src/democrit.ts
+  - kind: ethereum
+    name: VaultManager
+    network: matic
+    source:
+      abi: VaultManager
+      address: "0xd44da594D5a6109523814fBFC7c98949558CE46d"
+      startBlock: 66186618
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Vault
+      abis:
+        - name: VaultManager
+          file: ../out/VaultManager.sol/VaultManager.json
+      eventHandlers:
+        - event: VaultCreated(string,uint256,string,string,uint256)
+          handler: handleVaultCreated
+        - event: VaultChanged(string,uint256,string,uint256)
+          handler: handleVaultChanged
+        - event: VaultEmptied(string,uint256)
+          handler: handleVaultEmptied
+      file: ../lib/democrit-evm/subgraph/src/democrit.ts

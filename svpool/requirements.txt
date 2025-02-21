@@ -1,0 +1,4 @@
+eth-account==0.8.0
+jsonrpclib-pelix
+setuptools
+web3==6

@@ -1,0 +1,12 @@
+{
+  "matic": {
+    "DemocritSoccerverse": {
+      "address": "0xEB265D9fBb05641266366F15EcE76a268EF4a2A4",
+      "startBlock": 66186618
+    },
+    "VaultManager": {
+      "address": "0xd44da594D5a6109523814fBFC7c98949558CE46d",
+      "startBlock": 66186618
+    }
+  }
+}
