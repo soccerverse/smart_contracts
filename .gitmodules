@@ -1,0 +1,24 @@
+[submodule "lib/delegation-contract"]
+	path = lib/delegation-contract
+	url = https://github.com/xaya/delegation-contract
+[submodule "lib/democrit-evm"]
+	path = lib/democrit-evm
+	url = https://github.com/xaya/democrit-evm
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "lib/openzeppelin-contracts"]
+	path = lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "lib/polygon-contract"]
+	path = lib/polygon-contract
+	url = https://github.com/xaya/polygon-contract
+[submodule "lib/v2-periphery"]
+	path = lib/v2-periphery
+	url = https://github.com/Uniswap/v2-periphery
+[submodule "lib/wchi"]
+	path = lib/wchi
+	url = https://github.com/xaya/wchi
+[submodule "lib/WETH9-Solidity-0.8.6"]
+	path = lib/WETH9-Solidity-0.8.6
+	url = https://github.com/stackaccount1/WETH9-Solidity-0.8.6
