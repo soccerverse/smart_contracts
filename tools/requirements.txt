@@ -1,0 +1,2 @@
+jsonrpclib-pelix
+web3==7

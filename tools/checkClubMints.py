@@ -41,7 +41,7 @@ class MintBalanceChecker:
     """
 
     baseDir = os.path.dirname (os.path.abspath (__file__))
-    abiDir = os.path.join (baseDir, "out", f"{nm}.sol")
+    abiDir = os.path.join (baseDir, "..", "out", f"{nm}.sol")
     abiFile = os.path.join (abiDir, f"{nm}.json")
     with open (abiFile, "rt") as f:
       data = json.load (f)
