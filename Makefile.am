@@ -1,6 +1,6 @@
 DISTCLEANFILES = src/Config.sol
 
-democrit:
+all-local:
 	forge build
 
 check-local:
