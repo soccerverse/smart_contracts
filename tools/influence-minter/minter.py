@@ -57,10 +57,11 @@ class Web3Base:
     # We manage the nonce ourselves to avoid race conditions.
     self.nonce = self.w3.eth.get_transaction_count (self.acc.address)
 
-  def sendTx (self, call):
+  def signTx (self, call):
     """
-    Helper function to send a transaction with our worker address, based
-    on a function call.  Gas is estimated automatically.  The txid is returned.
+    Helper function to build and sign (but not yet send) a transaction with
+    our worker address, based on a function call.  Gas is estimated
+    automatically.
     """
 
     gas = call.estimate_gas ({"from": self.acc.address})
@@ -73,7 +74,16 @@ class Web3Base:
       "nonce": self.nonce,
     })
 
-    signed = self.w3.eth.account.sign_transaction (tx, private_key=self.key)
+    return self.w3.eth.account.sign_transaction (tx, private_key=self.key)
+
+  def sendTx (self, call):
+    """
+    Helper function to send a transaction with our worker address, based
+    on a function call.  Gas is estimated automatically.  The txid is returned.
+    """
+
+    signed = self.signTx (call)
+
     if DRY_RUN:
       txid = "dummy"
     else:
