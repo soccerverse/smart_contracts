@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2024 Soccerverse Ltd
+# Copyright (C) 2024-2025 Soccerverse Ltd
 
 """
 This script configures the clubs associated with the PackSale contracts
@@ -68,7 +68,7 @@ class TxSender:
     self.nonce += 1
 
     signed = self.acc.sign_transaction (tx)
-    txid = self.w3.eth.send_raw_transaction (signed.rawTransaction)
+    txid = self.w3.eth.send_raw_transaction (signed.raw_transaction)
     self.log.info ("  sending %s..." % txid.hex ())
     self.w3.eth.wait_for_transaction_receipt (txid)
 
