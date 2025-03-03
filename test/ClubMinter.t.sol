@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -88,6 +88,21 @@ contract ClubMinterTest is MinterTest
     cm.mintClubSmc (20, 200);
   }
 
+  function test_mintingEvents () public
+  {
+    vm.startPrank (minter);
+    cm.mintShares (10, 100, "domob");
+    cm.mintClubSmc (20, 10);
+
+    vm.expectEmit (address (cm));
+    emit ClubMinter.SharesMinted (10, 20, "andy", 120, cap - 120);
+    cm.mintShares (10, 20, "andy");
+
+    vm.expectEmit (address (cm));
+    emit ClubMinter.ClubSmcMinted (20, 500);
+    cm.mintClubSmc (20, 500);
+  }
+
   function test_mintingPermission () public
   {
     vm.startPrank (notMinter);
@@ -105,6 +120,45 @@ contract ClubMinterTest is MinterTest
     cm.mintShares (10, 2, "domob");
     cm.mintShares (10, 1, "domob");
     cm.mintShares (42, 10, "domob");
+  }
+
+  function test_prevMinter () public
+  {
+    vm.startPrank (minter);
+    cm.mintShares (10, 100, "domob");
+
+    vm.startPrank (admin);
+    ClubMinter upd = new ClubMinter (del, cm);
+    upd.grantRole (upd.MINTER_ROLE (), minter);
+    setUpClubMinter (upd);
+
+    vm.startPrank (minter);
+
+    assertEq (upd.sharesMinted (10), 100);
+    assertEq (upd.sharesMinted (20), 0);
+    assertEq (upd.sharesAvailable (10), cap - 100);
+
+    vm.expectEmit (address (upd));
+    emit ClubMinter.SharesMinted (10, 200, "andy", 300, cap - 300);
+    upd.mintShares (10, 200, "andy");
+
+    assertEq (upd.sharesMinted (10), 300);
+    assertEq (upd.sharesAvailable (10), cap - 300);
+
+    /* Even if the old contract is still used for minting, it shouldn't
+       mess up the tracking of minted shares in the new one.  */
+    cm.mintShares (10, 300, "domob");
+
+    assertEq (upd.sharesMinted (10), 600);
+    assertEq (upd.sharesAvailable (10), cap - 600);
+
+    /* The correct number should be used for tracking the cap.  */
+    vm.expectRevert ("mint cap exceeded");
+    upd.mintShares (10, cap - 599, "andy");
+
+    upd.mintShares (10, cap - 600, "andy");
+    assertEq (upd.sharesMinted (10), cap);
+    assertEq (upd.sharesAvailable (10), 0);
   }
 
   function test_mintZeroShares () public
