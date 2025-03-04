@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023-2024 Soccerverse Ltd
+// Copyright (C) 2023-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -41,11 +41,23 @@ contract ClubMinter is AccessControlEnumerable
   /** @dev Delegation contract used to send moves.  */
   XayaDelegation public immutable delegator;
 
+  /**
+   * @dev Optionally a previous ClubMinter instance.  The shares minted
+   * in that instance are counted towards what is already minted, so that
+   * we can keep the total in sync with the GSP even if we have to replace
+   * the ClubMinter for some reason.
+   */
+  ClubMinter public immutable prevMinter;
+
   /** @dev Maximum allowed supply for each share.  */
   uint public constant shareSupply = 1_000_000;
 
-  /** @dev Number of shares minted for each club ID.  */
-  mapping (uint => uint) public sharesMinted;
+  /**
+   * @dev Number of shares minted for each club ID on this contract alone.
+   * The total minted is this number plus the sharesMinted on the prevMinter
+   * (if any).
+   */
+  mapping (uint => uint) public sharesMintedSelf;
 
   /** @dev Emitted when new shares are minted.  */
   event SharesMinted (uint indexed clubId, uint num, string receiver,
@@ -53,13 +65,31 @@ contract ClubMinter is AccessControlEnumerable
   /** @dev Emitted when SMC are minted to a club's balance.  */
   event ClubSmcMinted (uint indexed clubId, uint num);
 
-  constructor (XayaDelegation d)
+  constructor (XayaDelegation d, ClubMinter p)
   {
+    if (address (p) != address (0))
+      require (
+          keccak256 (abi.encodePacked (gameId))
+              == keccak256 (abi.encodePacked (p.gameId ())),
+          "mismatch in game ID to prevMinter");
+
     _grantRole (DEFAULT_ADMIN_ROLE, msg.sender);
     delegator = d;
+    prevMinter = p;
 
     /* In case we need to pay fees for the minting moves, approve WCHI.  */
     d.accounts ().wchiToken ().approve (address (d), type (uint256).max);
+  }
+
+  /**
+   * @dev Returns the total number of shares minted for the given club,
+   * including those from the previous minter (if any).
+   */
+  function sharesMinted (uint clubId) public view returns (uint res)
+  {
+    res = sharesMintedSelf[clubId];
+    if (address (prevMinter) != address (0))
+      res += prevMinter.sharesMinted (clubId);
   }
 
   /**
@@ -68,7 +98,7 @@ contract ClubMinter is AccessControlEnumerable
    */
   function sharesAvailable (uint clubId) public view returns (uint)
   {
-    return shareSupply - sharesMinted[clubId];
+    return shareSupply - sharesMinted (clubId);
   }
 
   /**
@@ -77,7 +107,7 @@ contract ClubMinter is AccessControlEnumerable
   function mintShares (uint clubId, uint num, string calldata receiver)
       public onlyRole (MINTER_ROLE)
   {
-    uint minted = sharesMinted[clubId];
+    uint minted = sharesMinted (clubId);
     minted += num;
     require (minted <= shareSupply, "mint cap exceeded");
 
@@ -95,7 +125,7 @@ contract ClubMinter is AccessControlEnumerable
     path[2] = "shares";
     delegator.sendHierarchicalMove ("g", gameId, path, mintCmd);
 
-    sharesMinted[clubId] = minted;
+    sharesMintedSelf[clubId] += num;
     emit SharesMinted (clubId, num, receiver, minted, shareSupply - minted);
   }
 

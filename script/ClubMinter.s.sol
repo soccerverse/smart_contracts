@@ -1,6 +1,6 @@
 
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -20,7 +20,7 @@ contract ClubMinterScript is Script
     uint256 privkey = vm.envUint ("PRIVKEY");
     vm.startBroadcast (privkey);
 
-    new ClubMinter (PolygonConfig.del);
+    new ClubMinter (PolygonConfig.del, ClubMinter (address (0)));
 
     vm.stopBroadcast ();
   }

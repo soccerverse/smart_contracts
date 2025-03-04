@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -233,6 +233,40 @@ contract PackSaleTest is SaleTest
     assertEq (clubs[2], 20);
 
     checkClubIndices ();
+  }
+
+  function test_getClubsSlice () public
+  {
+    assertEq (ps.getNumClubs (), 0);
+    uint[] memory clubs = ps.getClubsSlice (0, 10);
+    assertEq (clubs.length, 0);
+    clubs = ps.getClubsSlice (5, 10);
+    assertEq (clubs.length, 0);
+
+    vm.startPrank (admin);
+    ps.addClub (100);
+    ps.addClub (101);
+    ps.addClub (102);
+    ps.addClub (103);
+
+    assertEq (ps.getNumClubs (), 4);
+
+    clubs = ps.getClubsSlice (0, 10);
+    assertEq (clubs.length, 4);
+    assertEq (clubs[0], 100);
+    assertEq (clubs[1], 101);
+    assertEq (clubs[2], 102);
+    assertEq (clubs[3], 103);
+
+    clubs = ps.getClubsSlice (0, 2);
+    assertEq (clubs.length, 2);
+    assertEq (clubs[0], 100);
+    assertEq (clubs[1], 101);
+
+    clubs = ps.getClubsSlice (2, 3);
+    assertEq (clubs.length, 2);
+    assertEq (clubs[0], 102);
+    assertEq (clubs[1], 103);
   }
 
   function test_removeClub () public
