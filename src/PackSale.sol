@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023-2024 Soccerverse Ltd
+// Copyright (C) 2023-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -458,6 +458,33 @@ contract PackSale is ERC2771Context, AccessControlEnumerable, Pausable
   function getAllClubs () public view returns (uint[] memory)
   {
     return clubIds;
+  }
+
+  /**
+   * @dev Returns the number of clubs in this tier.
+   */
+  function getNumClubs () public view returns (uint)
+  {
+    return clubIds.length;
+  }
+
+  /**
+   * @dev Returns a slice of the array of all clubs.  This can be used
+   * instead of getAllClubs() for the largest tier, where the full list of
+   * clubs may be too long to be returned in a single call.
+   */
+  function getClubsSlice (uint start, uint len)
+      public view returns (uint[] memory res)
+  {
+    if (start >= clubIds.length)
+      return new uint[] (0);
+
+    if (start + len > clubIds.length)
+      len = clubIds.length - start;
+
+    res = new uint[] (len);
+    for (uint i = 0; i < len; ++i)
+      res[i] = clubIds[i + start];
   }
 
   /**
