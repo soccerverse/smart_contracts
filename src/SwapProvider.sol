@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023 Soccerverse Ltd
+// Copyright (C) 2023-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -44,10 +44,14 @@ abstract contract SwapProvider
   /**
    * @dev Returns the expected amount of input token required to get
    * the provided output amount in WCHI.
+   *
+   * This function is not marked as view because Uniswap v3 quoting is not
+   * view either.  It is not making relevant state changes, though, and should
+   * only be used in off-chain calls.
    */
   function quoteExactOutput (IERC20 inputToken, uint outputAmount,
                              bytes calldata data)
-      public view virtual returns (uint);
+      public virtual returns (uint);
 
   /**
    * @dev Returns the expected amount of output token if the provided
@@ -55,7 +59,7 @@ abstract contract SwapProvider
    */
   function quoteExactInput (uint inputAmount, IERC20 outputToken,
                             bytes calldata data)
-      public view virtual returns (uint);
+      public virtual returns (uint);
 
   /**
    * @dev Performs a swap of input tokens to exact output WCHI tokens.
