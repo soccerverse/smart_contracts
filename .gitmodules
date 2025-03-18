@@ -22,3 +22,12 @@
 [submodule "lib/WETH9-Solidity-0.8.6"]
 	path = lib/WETH9-Solidity-0.8.6
 	url = https://github.com/stackaccount1/WETH9-Solidity-0.8.6
+[submodule "lib/v3-periphery"]
+	path = lib/v3-periphery
+	url = https://github.com/Uniswap/v3-periphery
+[submodule "lib/v3-core"]
+	path = lib/v3-core
+	url = https://github.com/Uniswap/v3-core
+[submodule "lib/solidity-bytes-utils"]
+	path = lib/solidity-bytes-utils
+	url = https://github.com/GNSPS/solidity-bytes-utils
