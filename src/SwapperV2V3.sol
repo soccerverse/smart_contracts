@@ -55,7 +55,7 @@ contract SwapperV2V3 is SwapProvider
    * @dev All input tokens and routing contracts for this approval has been
    * given already.  We use this to give approval on a first use basis.
    */
-  mapping (address => mapping (address => bool)) private tokenApproved;
+  mapping (IERC20 => mapping (address => bool)) private tokenApproved;
 
   constructor (IERC20 wc)
     SwapProvider (wc)
@@ -200,16 +200,87 @@ contract SwapperV2V3 is SwapProvider
     return outputAmount;
   }
 
-  function swapExactOutput (IERC20 /*inputToken*/, uint /*outputAmount*/,
-                            bytes calldata /*data*/) public override
+  function swapExactOutput (IERC20 inputToken, uint outputAmount,
+                            bytes calldata data) public override
   {
-    /* TODO: Implement */
+    /* We cannot do a multi-hop swap with exact output in reverse direction
+       (like quoteExactOutput) does, because then we would need to have the
+       previous output tokens as input before we actually get them in a swap.
+
+       It might be possible to do all that with a Uniswap flash loan, but
+       simpler is to run a quote first and then swap with the known exact input
+       instead, even though that might involve more computation (and gas).  */
+
+    uint inputAmount = quoteExactOutput (inputToken, outputAmount, data);
+    swapExactInput (inputAmount, wchi, data);
   }
 
-  function swapExactInput (uint /*inputAmount*/, IERC20 /*outputToken*/,
-                           bytes calldata /*data*/) public override
+  /**
+   * @dev Helper function to ensure we have given approval for a given token
+   * and router.
+   */
+  function ensureApproval (IERC20 token, address router)
+      private
   {
-    /* TODO: Implement */
+    if (tokenApproved[token][router])
+      return;
+
+    require (token.approve (router, type (uint256).max),
+             "failed to approve token");
+    tokenApproved[token][router] = true;
+  }
+
+  function swapExactInput (uint inputAmount, IERC20 outputToken,
+                           bytes calldata data) public override
+  {
+    Subpath[] memory paths = abi.decode (data, (Subpath[]));
+    require (paths.length > 0, "no swap requested");
+
+    address prevOutput;
+    uint outputAmount;
+    for (uint i = 0; i < paths.length; ++i)
+      {
+        (address input, address output) = getSubpathTokens (paths[i]);
+        /* We allow other input tokens than WCHI (defined by the path)
+           so that this can be used as part of swapExactOutput as well.  */
+        if (i > 0)
+          require (input == prevOutput, "tokens in path do not link");
+
+        /* Uniswap v2 */
+        if (address (paths[i].v2Router) != address (0))
+          {
+            ensureApproval (IERC20 (input), address (paths[i].v2Router));
+
+            address[] memory path = abi.decode (paths[i].path, (address[]));
+            uint[] memory amountsOut
+                = paths[i].v2Router.swapExactTokensForTokens (
+                      inputAmount, 0, path, address (this), block.timestamp);
+            outputAmount = amountsOut[amountsOut.length - 1];
+          }
+
+        /* Uniswap v3 */
+        else if (address (paths[i].v3Router) != address (0))
+          {
+            ensureApproval (IERC20 (input), address (paths[i].v3Router));
+
+            ISwapRouter.ExactInputParams memory params;
+            params.path = paths[i].path;
+            params.recipient = address (this);
+            params.deadline = block.timestamp;
+            params.amountIn = inputAmount;
+            params.amountOutMinimum = 0;
+            outputAmount = paths[i].v3Router.exactInput (params);
+          }
+
+        /* Something invalid */
+        else
+          revert ("subpath is neither V2 nor V3");
+
+        prevOutput = output;
+        inputAmount = outputAmount;
+      }
+
+    require (prevOutput == address (outputToken), "wrong output token in path");
   }
 
 }

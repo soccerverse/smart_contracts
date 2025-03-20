@@ -20,6 +20,14 @@ import logging
 import os.path
 import sys
 
+# Addresses of some holders of tokens, which we can use to
+# get balances from with impersonation.
+TOKEN_HOLDERS = {
+  const.USDC: "0xA4D94019934D8333Ef880ABFFbF2FDd611C762BD",
+  const.WCHI: "0x2ADCbe31a816897FaDaD6d61c9a9Fcfb9254B823",
+  const.WETH: "0xe50fA9b3c56FfB159cB0FCA61F5c9D750e8128c8",
+}
+
 ################################################################################
 
 class Tester:
@@ -37,15 +45,14 @@ class Tester:
 
     rpcConfig = jsonrpclib.config.DEFAULT
     rpcConfig.content_type = "application/json"
-    rpc = jsonrpclib.ServerProxy (rpcUrl, config=rpcConfig)
-    rpc.hardhat_autoImpersonateAccount (True)
+    self.rpc = jsonrpclib.ServerProxy (rpcUrl, config=rpcConfig)
+    self.rpc.hardhat_autoImpersonateAccount (True)
 
     # We use debugging methods (such as account impersonation) to send
     # transactions, so we do not need an actual private key.  But we generate
     # a random new address to use in the test.
     self.testAddress = Account.create ().address
     self.log.info ("Using test address: %s" % self.testAddress)
-    rpc.hardhat_setBalance (self.testAddress, "0x%x" % (100 * 10**18))
 
     swapper = self.loadContract ("SwapperV2V3")
     receipt = self.sendTx (swapper.constructor (token))
@@ -81,8 +88,49 @@ class Tester:
     if sender is None:
       sender = self.testAddress
 
+    # Ensure we can pay gas.
+    self.rpc.hardhat_setBalance (sender, "0x%x" % (100 * 10**18))
+
     txid = call.transact ({"from": sender})
     return self.w3.eth.wait_for_transaction_receipt (txid)
+
+  def clearTokens (self, tokens=[const.USDC, const.WCHI, const.WETH]):
+    """
+    Sets the balances of the given tokens for the swapper contract
+    to zero.
+    """
+
+    addr = self.swapper.address
+
+    for t in tokens:
+      c = self.loadContract ("IERC20", addr=t)
+      bal = c.functions.balanceOf (addr).call ()
+      if bal > 0:
+        self.sendTx (c.functions.transfer (TOKEN_HOLDERS[t], bal),
+                     sender=addr)
+
+  def getToken (self, token):
+    """
+    Adds a (large) balance of the given token to the swapper contract
+    address and returns the total given.
+    """
+
+    sender = TOKEN_HOLDERS[token]
+
+    c = self.loadContract ("IERC20", addr=token)
+    amount = c.functions.balanceOf (sender).call () // 2
+    self.sendTx (c.functions.transfer (self.swapper.address, amount),
+                 sender=sender)
+
+    return amount
+
+  def getBalance (self, token):
+    """
+    Returns the swapper contract's balance of a token.
+    """
+
+    c = self.loadContract ("IERC20", addr=token)
+    return c.functions.balanceOf (self.swapper.address).call ()
 
   def getInputOutputTokens (self, subp):
     """
@@ -149,6 +197,65 @@ class Tester:
 
     return quote
 
+  def testSwapExactInput (self, amount, subp):
+    """
+    Runs an actual swap with swapExactInput for the given input amount
+    and the path.  The exact input token will be retrieved into the swapper
+    balance beforehand.  Logs will be printed, and the amount retrieved
+    will be returned.
+    """
+
+    (inp, outp) = self.getInputOutputTokens (subp)
+    assert inp == self.exactToken
+
+    self.clearTokens ()
+    initialBalance = self.getToken (inp)
+
+    self.sendTx (self.swapper.functions.swapExactInput (amount, outp, subp))
+
+    sent = initialBalance - self.getBalance (inp)
+    received = self.getBalance (outp)
+
+    inputStr = self.formatToken (sent, inp)
+    outputStr = self.formatToken (received, outp)
+
+    self.log.info ("Exact input swap: %s to %s" % (inputStr, outputStr))
+
+    assert sent == amount
+
+    return received
+
+  def testSwapExactOutput (self, amount, subp):
+    """
+    Runs an actual swap with swapExactOutput for the given input
+    amount and path.  The amount sent will be returned.
+    """
+
+    (inp, outp) = self.getInputOutputTokens (subp)
+    assert outp == self.exactToken
+
+    self.clearTokens ()
+    initialBalance = self.getToken (inp)
+
+    self.sendTx (self.swapper.functions.swapExactOutput (inp, amount, subp))
+
+    sent = initialBalance - self.getBalance (inp)
+    received = self.getBalance (outp)
+
+    inputStr = self.formatToken (sent, inp)
+    outputStr = self.formatToken (received, outp)
+
+    self.log.info ("Exact output swap: %s to %s" % (inputStr, outputStr))
+
+    # It seems the quote is not always fully exact (but surely an upper bound)
+    # for the real input required to get a certain amount of output.  That is
+    # fine, as the difference is minor, and the user will have accepted the
+    # input amount anyway.  In a real-life situation, there will be slippage
+    # anyway, and the excess will be rolled into the burn fee.
+    assert received >= amount
+
+    return sent
+
 ################################################################################
 
 if __name__ == "__main__":
@@ -174,8 +281,12 @@ if __name__ == "__main__":
 
   t.testQuoteExactInput (10**8, wchiToUsdc)
   t.testQuoteExactInput (100 * 10**8, wchiToUsdc)
-  t.testQuoteExactInput (10000 * 10**8, wchiToUsdc)
+  quote = t.testQuoteExactInput (10000 * 10**8, wchiToUsdc)
+  received = t.testSwapExactInput (10000 * 10**8, wchiToUsdc)
+  assert quote == received
 
   t.testQuoteExactOutput (10**8, usdcToWchi)
   t.testQuoteExactOutput (100 * 10**8, usdcToWchi)
-  t.testQuoteExactOutput (10000 * 10**8, usdcToWchi)
+  quote = t.testQuoteExactOutput (10000 * 10**8, usdcToWchi)
+  sent = t.testSwapExactOutput (10000 * 10**8, usdcToWchi)
+  assert quote == sent
