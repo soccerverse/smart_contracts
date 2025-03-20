@@ -9,6 +9,7 @@ import "../src/ISanctionsList.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
+import "@xaya/eth-account-registry/contracts/XayaAccounts.sol";
 import "@xaya/eth-delegator-contract/contracts/XayaDelegation.sol";
 
 /**
@@ -43,5 +44,16 @@ library PolygonConfig
   /** @dev USDC token contract used.  */
   IERC20Metadata public constant usdc
       = IERC20Metadata (0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359);
+
+  /**
+   * @dev Returns the WCHI token address.
+   */
+  function wchi () public view returns (IERC20Metadata)
+  {
+    /* IXayaAccounts declares the wchiToken() function not as view, but it
+       is in XayaAccounts.  */
+    XayaAccounts acc = XayaAccounts (address (del.accounts ()));
+    return IERC20Metadata (address (acc.wchiToken ()));
+  }
 
 }
