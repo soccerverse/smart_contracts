@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023-2024 Soccerverse Ltd
+// Copyright (C) 2023-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -63,7 +63,7 @@ contract SwappingPackSale is PackSale
    */
   function quoteMint (PackMint memory mintData, IERC20 inputToken,
                       bytes calldata swapData)
-      public view returns (uint)
+      public returns (uint)
   {
     if (inputToken == token)
       return mintData.cost;
@@ -77,7 +77,7 @@ contract SwappingPackSale is PackSale
    */
   function previewAndQuote (uint clubId, uint numPacks,
                             IERC20 inputToken, bytes calldata swapData)
-      public view returns (PackMint memory mintData, uint cost)
+      public returns (PackMint memory mintData, uint cost)
   {
     mintData = preview (clubId, numPacks);
     cost = quoteMint (mintData, inputToken, swapData);

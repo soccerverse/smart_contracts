@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023 Soccerverse Ltd
+// Copyright (C) 2023-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -226,7 +226,7 @@ contract AutoConvert is ERC2771Context, Ownable
    */
   function quoteMarketBuy (IERC20 inputToken, uint wchiRequired,
                            bytes calldata swapData)
-      public view whenReady returns (uint)
+      public whenReady returns (uint)
   {
     uint totalRequired = addFee (wchiRequired, burnFee);
     uint inputRequired = swapper.quoteExactOutput (inputToken, totalRequired,
@@ -334,7 +334,7 @@ contract AutoConvert is ERC2771Context, Ownable
    */
   function quoteMarketSell (IERC20 outputToken, uint wchiReceived,
                             bytes calldata swapData)
-      public view whenReady returns (uint)
+      public whenReady returns (uint)
   {
     uint wchiForSwap = removeFee (wchiReceived, burnFee);
     uint output = swapper.quoteExactInput (wchiForSwap, outputToken, swapData);

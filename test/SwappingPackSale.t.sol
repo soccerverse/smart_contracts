@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -55,7 +55,7 @@ contract SwappingPackSaleTest is SaleTest
     assertFalse (ok);
   }
 
-  function test_quoteMint () public view
+  function test_quoteMint () public
   {
     PackSale.PackMint memory data = ps.preview (10, 2);
     assertEq (ps.quoteMint (data, usdc, rate), 200);
@@ -64,7 +64,7 @@ contract SwappingPackSaleTest is SaleTest
     assertEq (ps.quoteMint (data, wchi, rate), 40);
   }
 
-  function test_previewAndQuote () public view
+  function test_previewAndQuote () public
   {
     (PackSale.PackMint memory data, uint cost)
         = ps.previewAndQuote (10, 2, usdc, rate);
