@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2024 Soccerverse Ltd
+# Copyright (C) 2025 Soccerverse Ltd
 
 """
 Python script to test the SwapperV2V3 contract on a network forked

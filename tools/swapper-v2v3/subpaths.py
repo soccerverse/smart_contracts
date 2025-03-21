@@ -98,7 +98,7 @@ def decode (enc):
 # hardcode in the frontend.
 
 if __name__ == "__main__":
-  c = Constructor (const.WCHI)
-  c.addV2 (const.WETH)
-  c.addV3 ((500, const.USDC))
+  c = Constructor (const.USDC)
+  c.addV3 ((500, const.WETH))
+  c.addV2 (const.WCHI)
   print ("0x" + c.encode ().hex ())
