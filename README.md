@@ -19,6 +19,7 @@ these) are:
 | Contract | Production (`g/sv`) | Test (`g/svt`) |
 | -------- | ------------------- | -------------- |
 | AutoConvert | [0xA3098c68Fd99233B57Bd065AAc545Cca5f1ac296](https://polygonscan.com/address/0xA3098c68Fd99233B57Bd065AAc545Cca5f1ac296) | [0x65e25Ac5cCA094519729D5896C0BC3D8D682292e](https://polygonscan.com/address/0x65e25Ac5cCA094519729D5896C0BC3D8D682292e) |
+| AutoConvertQuoter | [0x65C16a1f5D8CeB6FA9CE9aB922C55fF0864AD134](https://polygonscan.com/address/0x65C16a1f5D8CeB6FA9CE9aB922C55fF0864AD134) | - |
 | DemocritSoccerverse | [0xEB265D9fBb05641266366F15EcE76a268EF4a2A4](https://polygonscan.com/address/0xEB265D9fBb05641266366F15EcE76a268EF4a2A4) | [0x183F8a1aF8bdD9db777CC31F3a05B6b7E36f2A4A](https://polygonscan.com/address/0x183F8a1aF8bdD9db777CC31F3a05B6b7E36f2A4A) |
 
 The subgraph for Democrit is deployed and can be queried at:
