@@ -42,3 +42,11 @@ Contracts for the pack sale are deployed at:
 | SwappingPackSale "tier 3" | [0x4259D89087b6EBBC8bE38A30393a2F99F798FE2f](https://polygonscan.com/address/0x4259D89087b6EBBC8bE38A30393a2F99F798FE2f) | [0xD41866e1298AAdD161D1CC8c014a3024df8aDB0B](https://polygonscan.com/address/0xD41866e1298AAdD161D1CC8c014a3024df8aDB0B) |
 | SwappingPackSale "tier 4" | [0x167360A54746b82e38f700dF0ef812c269c4e565](https://polygonscan.com/address/0x167360A54746b82e38f700dF0ef812c269c4e565) | [0x451A8DD7d571a75dbF46D11f614d1F034AfDbbf2](https://polygonscan.com/address/0x451A8DD7d571a75dbF46D11f614d1F034AfDbbf2) |
 | SwappingPackSale "tier 5" | [0x3d25Cb3139811c6AeE9D5ae8a01B2e5824b5dB91](https://polygonscan.com/address/0x3d25Cb3139811c6AeE9D5ae8a01B2e5824b5dB91) | [0x9855EA82dAca8cCBDBdA94A5A36cEB8128920Ef6](https://polygonscan.com/address/0x9855EA82dAca8cCBDBdA94A5A36cEB8128920Ef6) |
+
+## Helper Contracts
+
+Some helper contracts deployed on Polygon:
+
+| Contract | Production (`g/sv`) | Test (`g/svt`) |
+| -------- | ------------------- | -------------- |
+| BatchReveal | [0x75C438ce5bF1E75171d3dae550F8D2a2B3C56Be9](https://polygonscan.com/address/0x75C438ce5bF1E75171d3dae550F8D2a2B3C56Be9) | [0xaDd9b4d4ca852eD24d5A8D4344b5B62E4397D95e](https://polygonscan.com/address/0xaDd9b4d4ca852eD24d5A8D4344b5B62E4397D95e) |
