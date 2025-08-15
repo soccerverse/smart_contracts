@@ -12,6 +12,7 @@ using BoolSet for BoolSet.Type;
 contract BoolSetTest is Test
 {
 
+  /// forge-config: default.allow_internal_expect_revert = true
   function test_indexOutOfBounds () public
   {
     BoolSet.Type memory bs = BoolSet.create (0);

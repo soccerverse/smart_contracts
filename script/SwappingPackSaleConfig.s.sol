@@ -1,6 +1,6 @@
 
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -8,7 +8,7 @@ import "./PackSaleConfig.sol";
 import "./PolygonConfig.sol";
 import "../src/SwappingPackSale.sol";
 
-import { Script, console } from "forge-std/Script.sol";
+import { Script } from "forge-std/Script.sol";
 
 /**
  * @dev This is the script to set or update the configuration of the
