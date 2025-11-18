@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -8,8 +8,8 @@ import "./TestToken.sol";
 import "WETH9/WETH9.sol";
 
 import "@xaya/eth-account-registry/contracts/IXayaPolicy.sol";
-import "@xaya/eth-account-registry/contracts/TestPolicy.sol";
 import "@xaya/eth-account-registry/contracts/XayaAccounts.sol";
+import "@xaya/eth-account-registry/test/TestPolicy.sol";
 import "@xaya/eth-delegator-contract/contracts/XayaDelegation.sol";
 
 import { Test } from "forge-std/Test.sol";
