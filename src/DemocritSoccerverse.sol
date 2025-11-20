@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023-2024 Soccerverse Ltd
+// Copyright (C) 2023-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -99,6 +99,12 @@ contract DemocritSoccerverse is Democrit, ERC2771Context, Ownable, Pausable
       internal view override(Context, ERC2771Context) returns (bytes calldata)
   {
     return ERC2771Context._msgData ();
+  }
+
+  function _contextSuffixLength ()
+      internal view override(Context, ERC2771Context) returns (uint256)
+  {
+    return ERC2771Context._contextSuffixLength ();
   }
 
 }

@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import "@xaya/democrit-evm/contracts/JsonUtils.sol";
-import "@xaya/eth-delegator-contract/contracts/XayaDelegation.sol";
+import "@xaya/eth-delegator-contract/src/XayaDelegation.sol";
 
 import "./Config.sol";
 

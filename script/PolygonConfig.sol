@@ -1,6 +1,6 @@
 
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2025 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -9,8 +9,8 @@ import "../src/ISanctionsList.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
-import "@xaya/eth-account-registry/contracts/XayaAccounts.sol";
-import "@xaya/eth-delegator-contract/contracts/XayaDelegation.sol";
+import "@xaya/eth-account-registry/src/XayaAccounts.sol";
+import "@xaya/eth-delegator-contract/src/XayaDelegation.sol";
 
 /**
  * @dev Helper library defining constants such as token addresses

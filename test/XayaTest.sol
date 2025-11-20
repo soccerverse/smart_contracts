@@ -7,10 +7,10 @@ import "./TestToken.sol";
 
 import "WETH9/WETH9.sol";
 
-import "@xaya/eth-account-registry/contracts/IXayaPolicy.sol";
-import "@xaya/eth-account-registry/contracts/XayaAccounts.sol";
+import "@xaya/eth-account-registry/src/IXayaPolicy.sol";
+import "@xaya/eth-account-registry/src/XayaAccounts.sol";
 import "@xaya/eth-account-registry/test/TestPolicy.sol";
-import "@xaya/eth-delegator-contract/contracts/XayaDelegation.sol";
+import "@xaya/eth-delegator-contract/src/XayaDelegation.sol";
 
 import { Test } from "forge-std/Test.sol";
 

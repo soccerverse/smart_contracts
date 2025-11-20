@@ -210,6 +210,12 @@ contract AutoConvert is ERC2771Context, Ownable
     return ERC2771Context._msgData ();
   }
 
+  function _contextSuffixLength ()
+      internal view override(Context, ERC2771Context) returns (uint256)
+  {
+    return ERC2771Context._contextSuffixLength ();
+  }
+
   /* ************************************************************************ */
 
   /**

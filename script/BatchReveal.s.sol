@@ -7,7 +7,7 @@ import "./PolygonConfig.sol";
 import "../src/BatchReveal.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@xaya/eth-account-registry/contracts/IXayaAccounts.sol";
+import "@xaya/eth-account-registry/src/IXayaAccounts.sol";
 
 import { Script } from "forge-std/Script.sol";
 

@@ -254,6 +254,12 @@ contract PackSale is ERC2771Context, AccessControlEnumerable, Pausable
     return ERC2771Context._msgData ();
   }
 
+  function _contextSuffixLength ()
+      internal view override(Context, ERC2771Context) returns (uint256)
+  {
+    return ERC2771Context._contextSuffixLength ();
+  }
+
   function pause () public onlyRole (CONFIGURE_ROLE)
   {
     _pause ();
