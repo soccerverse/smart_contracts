@@ -172,6 +172,41 @@ class VoucherMinter (Web3Base):
     state.commit ()
     self.log.info ("Scheduled %d names from %s" % (cnt, filename))
 
+  def addRefCup (self, filename):
+    with open (filename, "rt") as f:
+      data = json.load (f)
+
+    # The data is already sorted, but we verify that.
+    lastShares = 10**18
+    for ind in range (0, len (data["entries"])):
+      cur = data["entries"][ind]
+      assert cur["totalBonusShares"] <= lastShares
+      lastShares = cur["totalBonusShares"]
+
+      amount = None
+      if ind == 0:
+        amount = 500
+      elif ind == 1:
+        amount = 300
+      elif ind == 2:
+        amount = 100
+      elif ind < 10:
+        amount = 50
+      else:
+        amount = 20
+
+      nm = cur["account"]
+      tokenId = self.accounts.functions.tokenIdForName ("p", nm).call ()
+      try:
+        owner = self.accounts.functions.ownerOf (tokenId).call ()
+      except web3.exceptions.ContractLogicError:
+        raise RuntimeError ("invalid name: %s" % nm)
+      state.addMint (owner, amount)
+
+      print (ind, nm, amount)
+
+    state.commit ()
+
   def execute (self, state):
     # Go through all mints in the database.  Those that don't yet have a txid
     # are to be done.  For those that have one, try to wait for the transaction
@@ -226,6 +261,8 @@ if __name__ == "__main__":
                        help="Filename for SQLite database storing state")
   parser.add_argument ("--addresses", required=False,
                        help="File with list of addresses to add to mint")
+  parser.add_argument ("--addrefcup", required=False,
+                       help="File with referral cup JSON data")
   parser.add_argument ("--names", required=False,
                        help="File with list of names to add to mint")
   parser.add_argument ("--amount", type=int, required=False,
@@ -242,6 +279,8 @@ if __name__ == "__main__":
   minter = VoucherMinter (args.eth_rpc_url)
 
   with openState (args.state) as state:
+    if args.addrefcup is not None:
+      minter.addRefCup (args.addrefcup)
     if hasAddresses:
       minter.addAddresses (state, args.addresses, args.amount)
     if hasNames:
