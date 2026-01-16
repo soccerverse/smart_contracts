@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -9,8 +9,8 @@ import "../src/AutoConvert.sol";
 import "../src/DemocritSoccerverse.sol";
 import "../src/SoccerverseConfig.sol";
 
-import "@xaya/democrit-evm/contracts/LimitBuying.sol";
-import "@xaya/democrit-evm/contracts/VaultManager.sol";
+import "@xaya/democrit-evm/src/LimitBuying.sol";
+import "@xaya/democrit-evm/src/VaultManager.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 /**

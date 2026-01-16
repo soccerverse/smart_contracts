@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023-2024 Soccerverse Ltd
+// Copyright (C) 2023-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
-import "@xaya/democrit-evm/contracts/IDemocritConfig.sol";
-import "@xaya/democrit-evm/contracts/JsonUtils.sol";
+import "@xaya/democrit-evm/src/IDemocritConfig.sol";
+import "@xaya/democrit-evm/src/JsonUtils.sol";
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 

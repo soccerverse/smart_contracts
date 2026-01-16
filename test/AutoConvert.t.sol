@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024 Soccerverse Ltd
+// Copyright (C) 2024-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -7,7 +7,7 @@ import "./DemocritTest.sol";
 import "./TestSwapProvider.sol";
 import "./TestToken.sol";
 
-import "@xaya/democrit-evm/contracts/LimitSelling.sol";
+import "@xaya/democrit-evm/src/LimitSelling.sol";
 
 contract AutoConvertTest is DemocritTest
 {

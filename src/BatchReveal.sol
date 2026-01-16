@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2025 Soccerverse Ltd
+// Copyright (C) 2025-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
 import "./Config.sol";
 
-import "@xaya/democrit-evm/contracts/AccountHolder.sol";
+import "@xaya/democrit-evm/src/AccountHolder.sol";
 
 /**
  * @dev A smart contract that owns a name and can be used to batch-send

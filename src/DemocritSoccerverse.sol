@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023-2025 Soccerverse Ltd
+// Copyright (C) 2023-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -7,8 +7,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 
-import "@xaya/democrit-evm/contracts/Democrit.sol";
-import "@xaya/democrit-evm/contracts/VaultManager.sol";
+import "@xaya/democrit-evm/src/Democrit.sol";
+import "@xaya/democrit-evm/src/VaultManager.sol";
 
 /**
  * @dev The Democrit main contract for Soccerverse.

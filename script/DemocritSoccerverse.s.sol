@@ -1,6 +1,6 @@
 
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024-2025 Soccerverse Ltd
+// Copyright (C) 2024-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -12,7 +12,7 @@ import "../src/SwapperUniswapV2.sol";
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@xaya/democrit-evm/contracts/VaultManager.sol";
+import "@xaya/democrit-evm/src/VaultManager.sol";
 import "@xaya/eth-account-registry/src/IXayaAccounts.sol";
 import "@xaya/eth-delegator-contract/src/XayaDelegation.sol";
 
