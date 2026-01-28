@@ -19,7 +19,7 @@ dataSources:
         - SellOrder
       abis:
         - name: Democrit
-          file: ../out/Democrit.sol/Democrit.json
+          file: ../lib/democrit-evm/out/Democrit.sol/Democrit.json
       eventHandlers:
         - event: Trade(string,uint256,uint256,string,string)
           handler: handleTrade
@@ -63,7 +63,7 @@ dataSources:
         - Vault
       abis:
         - name: VaultManager
-          file: ../out/VaultManager.sol/VaultManager.json
+          file: ../lib/democrit-evm/out/VaultManager.sol/VaultManager.json
       eventHandlers:
         - event: VaultCreated(string,uint256,string,string,uint256)
           handler: handleVaultCreated
