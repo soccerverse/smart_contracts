@@ -24,6 +24,7 @@ import config
 from minter import Web3Base
 
 import web3
+from w3multicall.multicall import W3Multicall
 
 import argparse
 from contextlib import contextmanager
@@ -158,19 +159,44 @@ class VoucherMinter (Web3Base):
     self.log.info ("Scheduled %d addresses from %s" % (cnt, filename))
 
   def addNames (self, state, filename, amount):
-    cnt = 0
+    names = []
     with open (filename, "rt") as f:
       for nm in f:
-        nm = nm.strip ("\n")
-        tokenId = self.accounts.functions.tokenIdForName ("p", nm).call ()
-        try:
-          owner = self.accounts.functions.ownerOf (tokenId).call ()
-        except web3.exceptions.ContractLogicError:
-          raise RuntimeError ("invalid name: %s" % nm)
-        state.addMint (owner, amount)
-        cnt += 1
+        names.append (nm.strip ("\n"))
+
+    multicallBatch = 1000
+    for i in range (0, len (names), multicallBatch):
+      batch = names[i : i + multicallBatch]
+      self.log.info (f"Processing names {i} to {i + len (batch) - 1}...")
+
+      calls = [
+          W3Multicall.Call (self.accounts.address,
+                            "tokenIdForName(string,string)(uint256)",
+                            ["p", nm])
+          for nm in batch
+      ]
+      mc = W3Multicall (self.w3)
+      for c in calls:
+        mc.add (c)
+      tokenIds = mc.call ()
+
+      calls = [
+          W3Multicall.Call (self.accounts.address,
+                            "ownerOf(uint256)(address)",
+                            tid)
+          for tid in tokenIds
+      ]
+      mc = W3Multicall (self.w3)
+      for c in calls:
+        mc.add (c)
+      owners = mc.call ()
+
+      for o in owners:
+        addr = self.w3.to_checksum_address (o)
+        state.addMint (addr, amount)
+
     state.commit ()
-    self.log.info ("Scheduled %d names from %s" % (cnt, filename))
+    self.log.info ("Scheduled %d names from %s" % (len (names), filename))
 
   def execute (self, state):
     # Go through all mints in the database.  Those that don't yet have a txid
@@ -180,16 +206,23 @@ class VoucherMinter (Web3Base):
     allMints = state.fetchMints ()
     todo = []
     failed = set ()
+    success = set ()
     for m in allMints:
       if m["txid"] is None:
         todo.append (m)
+      elif m["txid"] in failed:
+        todo.append (m)
+      elif m["txid"] in success:
+        pass
       else:
+        self.log.debug (f"Checking tx {m['txid']}...")
         receipt = self.w3.eth.wait_for_transaction_receipt (m["txid"])
-        if receipt["status"] != 1:
-          if m["txid"] not in failed:
-            failed.add (m["txid"])
-            self.log.warning ("Transaction %s reverted, retrying" % m["txid"])
-            state.removeTxid (m["txid"])
+        if receipt["status"] == 1:
+          success.add (m["txid"])
+        else:
+          failed.add (m["txid"])
+          self.log.warning ("Transaction %s reverted, retrying" % m["txid"])
+          state.removeTxid (m["txid"])
           todo.append (m)
     state.commit ()
 
