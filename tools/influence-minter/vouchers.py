@@ -161,7 +161,7 @@ class VoucherMinter (Web3Base):
     cnt = 0
     with open (filename, "rt") as f:
       for nm in f:
-        nm = nm.strip ()
+        nm = nm.strip ("\n")
         tokenId = self.accounts.functions.tokenIdForName ("p", nm).call ()
         try:
           owner = self.accounts.functions.ownerOf (tokenId).call ()
