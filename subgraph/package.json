@@ -1,5 +1,8 @@
 {
   "dependencies": {
-    "@graphprotocol/graph-ts": ""
+    "@graphprotocol/graph-ts": "0.37.0"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.98.1"
   }
 }
