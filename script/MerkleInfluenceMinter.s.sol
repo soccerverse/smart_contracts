@@ -17,7 +17,7 @@ contract MerkleInfluenceMinterScript is Script
 
   /** @dev The Merkle tree root hash to use for the deployment.  */
   bytes32 public constant ROOT_HASH
-      = hex"52af438ce745b78e7547cbf8d1f860d2abb5438507069b73234c1cf56f790594";
+      = hex"9bf36fdda71d71298766398dd9705d0d8fdb2fdcf881c863baec123433861e5d";
 
   function run () public
   {

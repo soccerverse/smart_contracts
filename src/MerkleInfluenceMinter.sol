@@ -5,6 +5,7 @@ pragma solidity ^0.8.19;
 
 import "./ClubMinter.sol";
 
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 
 /**
@@ -25,8 +26,13 @@ import "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
  * and instead keep it all secured by the team multisig that needs to just
  * perform one action to grant the MerkleInfluenceMinter with the right
  * root hash minting permission.
+ *
+ * This contract is Ownable, and gives the owner permission to renounce
+ * the MINTER_ROLE the contract has (so that this can be done without requiring
+ * to go through a multisig or high-security transaction again with the key
+ * admin account for ClubMinter).  The owner has no other permissions.
  */
-contract MerkleInfluenceMinter
+contract MerkleInfluenceMinter is Ownable
 {
 
   /**
@@ -161,6 +167,14 @@ contract MerkleInfluenceMinter
   {
     for (uint i = 0; i < batch.length; ++i)
       execute (batch[i].mint, batch[i].proof);
+  }
+
+  /**
+   * @dev Renounces the MINTER_ROLE the contract has on the ClubMinter.
+   */
+  function renounceMinterRole () public onlyOwner
+  {
+    minter.renounceRole (minter.MINTER_ROLE (), address (this));
   }
 
 }
