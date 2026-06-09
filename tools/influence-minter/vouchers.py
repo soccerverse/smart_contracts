@@ -177,26 +177,28 @@ class VoucherMinter (Web3Base):
       batch = names[i : i + multicallBatch]
       self.log.info (f"Processing names {i} to {i + len (batch) - 1}...")
 
-      calls = [
-          W3Multicall.Call (self.accounts.address,
-                            "tokenIdForName(string,string)(uint256)",
-                            ["p", nm])
-          for nm in batch
-      ]
       mc = W3Multicall (self.w3)
-      for c in calls:
-        mc.add (c)
+      for nm in batch:
+        mc.add (W3Multicall.Call (self.accounts.address,
+                                  "tokenIdForName(string,string)(uint256)",
+                                  ["p", nm]))
       tokenIds = mc.call ()
 
-      calls = [
-          W3Multicall.Call (self.accounts.address,
-                            "ownerOf(uint256)(address)",
-                            tid)
-          for tid in tokenIds
-      ]
       mc = W3Multicall (self.w3)
-      for c in calls:
-        mc.add (c)
+      for tid in tokenIds:
+        mc.add (W3Multicall.Call (self.accounts.address,
+                                  "exists(uint256)(bool)",
+                                  tid))
+      exists = mc.call ()
+
+      mc = W3Multicall (self.w3)
+      for (nm, tid, exists) in zip (batch, tokenIds, exists):
+        if exists:
+          mc.add (W3Multicall.Call (self.accounts.address,
+                                    "ownerOf(uint256)(address)",
+                                    tid))
+        else:
+          self.log.warning (f"Name does not exist: {nm}")
       owners = mc.call ()
 
       for o in owners:
