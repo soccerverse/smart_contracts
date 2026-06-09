@@ -136,10 +136,18 @@ class VoucherMinter (Web3Base):
     self.log.info ("Using XayaAccounts at %s" % self.accounts.address)
 
     self.setupAccount ()
-    # Check that we are LIMITED_MINTER_ROLE on the voucher contract.
-    role = self.voucher.functions.LIMITED_MINTER_ROLE ().call ()
-    if not self.voucher.functions.hasRole (role, self.acc.address).call ():
-      raise RuntimeError ("Worker address is not LIMITED_MINTER_ROLE")
+    # Check that we are LIMITED_MINTER_ROLE on the voucher contract
+    # or TOKEN_ADMIN_ROLE.
+    roles = [
+      self.voucher.functions.LIMITED_MINTER_ROLE ().call (),
+      self.voucher.functions.TOKEN_ADMIN_ROLE ().call (),
+    ]
+    ok = False
+    for r in roles:
+      if self.voucher.functions.hasRole (r, self.acc.address).call ():
+        ok = True
+    if not ok:
+      raise RuntimeError ("Worker address has no minting role")
 
     remaining = self.voucher.functions.mintLimitRemaining ().call ()
     value = Decimal (remaining) / 10**self.decimals
