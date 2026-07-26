@@ -28,6 +28,7 @@ from w3multicall.multicall import W3Multicall
 
 import argparse
 from contextlib import contextmanager
+import csv
 from decimal import Decimal
 import json
 import logging
@@ -166,12 +167,13 @@ class VoucherMinter (Web3Base):
     state.commit ()
     self.log.info ("Scheduled %d addresses from %s" % (cnt, filename))
 
-  def addNames (self, state, filename, amount):
-    names = []
-    with open (filename, "rt") as f:
-      for nm in f:
-        names.append (nm.strip ("\n"))
-
+  def _resolveNames (self, names):
+    """
+    Resolves a list of names to their owner addresses via on-chain multicall.
+    Returns {name: address} for successfully resolved names.
+    Non-existent names are omitted from the result (with a warning logged).
+    """
+    resolved = {}
     multicallBatch = 1000
     for i in range (0, len (names), multicallBatch):
       batch = names[i : i + multicallBatch]
@@ -192,21 +194,59 @@ class VoucherMinter (Web3Base):
       exists = mc.call ()
 
       mc = W3Multicall (self.w3)
-      for (nm, tid, exists) in zip (batch, tokenIds, exists):
-        if exists:
+      name_order = []
+      for (nm, tid, ex) in zip (batch, tokenIds, exists):
+        if ex:
           mc.add (W3Multicall.Call (self.accounts.address,
                                     "ownerOf(uint256)(address)",
                                     tid))
+          name_order.append (nm)
         else:
           self.log.warning (f"Name does not exist: {nm}")
       owners = mc.call ()
 
-      for o in owners:
+      for nm, o in zip (name_order, owners):
         addr = self.w3.to_checksum_address (o)
+        resolved[nm] = addr
+
+    return resolved
+
+  def addNames (self, state, filename, amount):
+    names = []
+    with open (filename, "rt") as f:
+      for nm in f:
+        names.append (nm.strip ("\n"))
+
+    resolved = self._resolveNames (names)
+
+    for nm in names:
+      addr = resolved.get (nm)
+      if addr is not None:
         state.addMint (addr, amount)
 
     state.commit ()
     self.log.info ("Scheduled %d names from %s" % (len (names), filename))
+
+  def addCSV (self, state, filename):
+    rows = []
+    with open (filename, "rt") as f:
+      for row in csv.DictReader (f):
+        name = row["name"].strip ()
+        amount = int (row["amount"])
+        rows.append ((name, amount))
+
+    names = [r[0] for r in rows]
+    resolved = self._resolveNames (names)
+
+    cnt = 0
+    for name, amount in rows:
+      addr = resolved.get (name)
+      if addr is not None:
+        state.addMint (addr, amount)
+        cnt += 1
+
+    state.commit ()
+    self.log.info ("Scheduled %d CSV entries from %s" % (cnt, filename))
 
   def execute (self, state):
     # Go through all mints in the database.  Those that don't yet have a txid
@@ -271,6 +311,8 @@ if __name__ == "__main__":
                        help="File with list of addresses to add to mint")
   parser.add_argument ("--names", required=False,
                        help="File with list of names to add to mint")
+  parser.add_argument ("--csv", required=False,
+                       help="CSV file with name and amount columns to add to mint")
   parser.add_argument ("--amount", type=int, required=False,
                        help="Amount (in USD equivalent) to mint")
   parser.add_argument ("--execute", action="store_true",
@@ -279,12 +321,18 @@ if __name__ == "__main__":
 
   hasAddresses = (args.addresses is not None)
   hasNames = (args.names is not None)
+  hasCSV = (args.csv is not None)
+
+  if hasCSV and (hasAddresses or hasNames or args.amount is not None):
+    sys.exit ("--csv may not be combined with --addresses, --names, or --amount")
   if (hasAddresses or hasNames) and args.amount is None:
     sys.exit ("--amount must be set if --addresses or --names is set")
 
   minter = VoucherMinter (args.eth_rpc_url)
 
   with openState (args.state) as state:
+    if hasCSV:
+      minter.addCSV (state, args.csv)
     if hasAddresses:
       minter.addAddresses (state, args.addresses, args.amount)
     if hasNames:
