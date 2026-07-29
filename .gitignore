@@ -1,15 +1,3 @@
-INSTALL
-aclocal.m4
-autom4te.cache
-configure
-configure~
-config.status
-install-sh
-missing
-
 broadcast
 cache
 out
-
-Makefile
-Makefile.in
