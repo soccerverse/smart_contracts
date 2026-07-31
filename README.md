@@ -22,12 +22,6 @@ these) are:
 | AutoConvertQuoter | [0x65C16a1f5D8CeB6FA9CE9aB922C55fF0864AD134](https://polygonscan.com/address/0x65C16a1f5D8CeB6FA9CE9aB922C55fF0864AD134) | - |
 | DemocritSoccerverse | [0xEB265D9fBb05641266366F15EcE76a268EF4a2A4](https://polygonscan.com/address/0xEB265D9fBb05641266366F15EcE76a268EF4a2A4) | [0x183F8a1aF8bdD9db777CC31F3a05B6b7E36f2A4A](https://polygonscan.com/address/0x183F8a1aF8bdD9db777CC31F3a05B6b7E36f2A4A) |
 
-The subgraph for Democrit is deployed and can be queried at:
-- Production (`g/sv`):
-  - [https://api.studio.thegraph.com/query/97741/soccerverse-democrit-sv/version/latest](https://api.studio.thegraph.com/query/97741/soccerverse-democrit-sv/version/latest)
-  - [https://polygon-mainnet.graph-eu.p2pify.com/0b6e45304f8e91b9cf21b1b492654e22/sgr-491-874-073](https://polygon-mainnet.graph-eu.p2pify.com/0b6e45304f8e91b9cf21b1b492654e22/sgr-491-874-073)
-- Test (`g/svt`): [https://api.studio.thegraph.com/query/44576/soccerverse-democrit-svt/version/latest](https://api.studio.thegraph.com/query/44576/soccerverse-democrit-svt/version/latest)
-
 ## Pack Sale
 
 Contracts for the pack sale are deployed at:
