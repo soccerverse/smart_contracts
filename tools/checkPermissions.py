@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright (C) 2024 Soccerverse Ltd
+# Copyright (C) 2024-2026 Soccerverse Ltd
 
 """
 This script queries for and displays all the access roles and permissions
@@ -76,6 +76,11 @@ class PermissionsChecker:
     self.logRoleMembers (c, "BURNER_ROLE")
     self.logRoleMembers (c, "LIMITED_MINTER_ROLE")
 
+  def checkSVVMinter (self, addr):
+    c = self.getContract ("SVVMinter", addr)
+    self.log.info ("SVVMinter at %s:" % c.address)
+    self.logRoleMembers (c, "DEFAULT_ADMIN_ROLE")
+
   def checkSwappingPackSale (self, addr):
     c = self.getContract ("SwappingPackSale", addr)
     tier = c.functions.tier ().call ()
@@ -111,6 +116,7 @@ if __name__ == "__main__":
   checker.checkClubMinter ("0xeEE0d855112b71Dc68d72053594Af03F92C586Ae")
   checker.checkPurchaseTracker ("0x879E44f2025cAd323f8F1C7C28F672F5f3f92304")
   checker.checkPackVoucher ("0x9De075D87B812eC647d5541CB50d65Bc06Ec6509")
+  checker.checkSVVMinter ("0x6B3A1117fe955BfF0f8F0A770E8f1E8F13DFAd4d")
 
   checker.checkSwappingPackSale ("0x8501A9018A5625b720355A5A05c5dA3D5E8bB003")
   checker.checkSwappingPackSale ("0x0bF818f3A69485c8B05Cf6292D9A04C6f58ADF08")

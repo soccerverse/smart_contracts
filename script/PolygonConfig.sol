@@ -1,10 +1,11 @@
 
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2024-2025 Soccerverse Ltd
+// Copyright (C) 2024-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
 import "../src/ISanctionsList.sol";
+import "../src/PackVoucher.sol";
 
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router01.sol";
@@ -44,6 +45,10 @@ library PolygonConfig
   /** @dev USDC token contract used.  */
   IERC20Metadata public constant usdc
       = IERC20Metadata (0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359);
+
+  /** @dev The SVV voucher contract.  */
+  PackVoucher public constant svv
+      = PackVoucher (0x9De075D87B812eC647d5541CB50d65Bc06Ec6509);
 
   /**
    * @dev Returns the WCHI token address.
