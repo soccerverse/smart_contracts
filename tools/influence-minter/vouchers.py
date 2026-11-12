@@ -118,12 +118,18 @@ class VoucherMinter (Web3Base):
   def __init__ (self, rpcUrl):
     super ().__init__ (rpcUrl)
 
+    with open ("SVVMinter.json", "rt") as f:
+      data = json.load (f)
+    self.minter = self.w3.eth.contract (address=config.SVV_MINTER,
+                                        abi=data["abi"])
+    self.log.info ("Using SVVMinter at %s" % self.minter.address)
+
     with open ("PackVoucher.json", "rt") as f:
       data = json.load (f)
-    self.voucher = self.w3.eth.contract (address=config.PACK_VOUCHER,
-                                         abi=data["abi"])
-    self.log.info ("Using PackVoucher at %s" % self.voucher.address)
-    self.decimals = self.voucher.functions.decimals ().call ()
+    svvAddr = self.minter.functions.svv ().call ()
+    voucher = self.w3.eth.contract (address=svvAddr, abi=data["abi"])
+    self.log.info ("Using PackVoucher at %s" % voucher.address)
+    self.decimals = voucher.functions.decimals ().call ()
 
     with open ("XayaDelegation.json", "rt") as f:
       data = json.load (f)
@@ -137,20 +143,9 @@ class VoucherMinter (Web3Base):
     self.log.info ("Using XayaAccounts at %s" % self.accounts.address)
 
     self.setupAccount ()
-    # Check that we are LIMITED_MINTER_ROLE on the voucher contract
-    # or TOKEN_ADMIN_ROLE.
-    roles = [
-      self.voucher.functions.LIMITED_MINTER_ROLE ().call (),
-      self.voucher.functions.TOKEN_ADMIN_ROLE ().call (),
-    ]
-    ok = False
-    for r in roles:
-      if self.voucher.functions.hasRole (r, self.acc.address).call ():
-        ok = True
-    if not ok:
-      raise RuntimeError ("Worker address has no minting role")
-
-    remaining = self.voucher.functions.mintLimitRemaining ().call ()
+    # Check the remaining budget on the SVVMinter contract.
+    remaining = self.minter.functions \
+        .addressMintLimit (self.acc.address).call ()
     value = Decimal (remaining) / 10**self.decimals
     self.log.info ("Remaining mint capacity: %.2f USD" % value)
 
@@ -286,7 +281,7 @@ class VoucherMinter (Web3Base):
         {"to": m["address"], "amount": 10**self.decimals * m["amount"]}
         for m in cur
       ]
-      tx = self.signTx (self.voucher.functions.batchMint (ops))
+      tx = self.signTx (self.minter.functions.batchMint (ops))
       txid = tx["hash"].hex ()
 
       for m in cur:
