@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2023-2025 Soccerverse Ltd
+// Copyright (C) 2023-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
@@ -8,6 +8,7 @@ import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@uniswap/v2-periphery/contracts/interfaces/IWETH.sol";
 
+import "./AutoConvertLib.sol";
 import "./DemocritSoccerverse.sol";
 import "./SwapProvider.sol";
 
@@ -50,15 +51,12 @@ contract AutoConvert is ERC2771Context, Ownable
   /** @dev The swap provider used currently for auto-convert.  */
   SwapProvider public swapper;
 
-  /** @dev The base denominator for the auto-convert fees (basis points).  */
-  uint public constant BASIS_POINTS = 10000;
-
   /**
    * @dev Maximum permissible fee (for company and WCHI burn).  This is
    * a basic security mechanism to ensure that even the owner cannot
    * set an unreasonable fee.
    */
-  uint public constant MAX_FEE = BASIS_POINTS / 20;
+  uint public constant MAX_FEE = AutoConvertLib.BASIS_POINTS / 20;
 
   /** @dev Fee charged on auto-convert in WCHI for burning.  */
   uint public burnFee;
@@ -219,14 +217,6 @@ contract AutoConvert is ERC2771Context, Ownable
   /* ************************************************************************ */
 
   /**
-   * @dev Helper function that adds a fee in basis points to a given amount.
-   */
-  function addFee (uint amount, uint bps) private pure returns (uint)
-  {
-    return amount * (BASIS_POINTS + bps) / BASIS_POINTS;
-  }
-
-  /**
    * @dev Returns the current quote of input token required to make a
    * purchase of SMC for the given total in WCHI required.
    */
@@ -234,10 +224,8 @@ contract AutoConvert is ERC2771Context, Ownable
                            bytes calldata swapData)
       public whenReady returns (uint)
   {
-    uint totalRequired = addFee (wchiRequired, burnFee);
-    uint inputRequired = swapper.quoteExactOutput (inputToken, totalRequired,
-                                                   swapData);
-    return addFee (inputRequired, convertFee);
+    return AutoConvertLib.quoteMarketBuy (swapper, inputToken, wchiRequired,
+                                          burnFee, convertFee, swapData);
   }
 
   /**
@@ -276,7 +264,7 @@ contract AutoConvert is ERC2771Context, Ownable
                  "transferring the input tokens failed");
       }
 
-    uint totalWchi = addFee (wchiAmount, burnFee);
+    uint totalWchi = AutoConvertLib.addFee (wchiAmount, burnFee);
     uint wchiFee = totalWchi - wchiAmount;
     swapper.swapExactOutput (inputToken, totalWchi, swapData);
 
@@ -315,8 +303,9 @@ contract AutoConvert is ERC2771Context, Ownable
            that the user passed in the right quote), and thus also prevents
            sandwich attacks.  */
         uint minFee = convertFee - slippageTolerance;
-        require (actualFee >= inputAmount * minFee / BASIS_POINTS,
-                 "slippage too high");
+        require (
+            actualFee >= inputAmount * minFee / AutoConvertLib.BASIS_POINTS,
+            "slippage too high");
         swapper.transferToken (inputToken, actualFee, feeReceiver);
       }
 
@@ -326,15 +315,6 @@ contract AutoConvert is ERC2771Context, Ownable
   /* ************************************************************************ */
 
   /**
-   * @dev Helper function that removes a fee in basis points from a given
-   * total amount.
-   */
-  function removeFee (uint amount, uint bps) private pure returns (uint)
-  {
-    return amount * (BASIS_POINTS - bps) / BASIS_POINTS;
-  }
-
-  /**
    * @dev Returns the current quote of output token received when
    * "market selling" SMC that yields a given total in WCHI.
    */
@@ -342,10 +322,8 @@ contract AutoConvert is ERC2771Context, Ownable
                             bytes calldata swapData)
       public whenReady returns (uint)
   {
-    uint wchiForSwap = removeFee (wchiReceived, burnFee);
-    uint output = swapper.quoteExactInput (wchiForSwap, outputToken, swapData);
-
-    return removeFee (output, convertFee);
+    return AutoConvertLib.quoteMarketSell (swapper, wchiReceived, burnFee,
+                                           convertFee, outputToken, swapData);
   }
 
   /**
@@ -399,7 +377,7 @@ contract AutoConvert is ERC2771Context, Ownable
     uint actualBurn = 0;
     if (burnReceiver != address (0))
       {
-        actualBurn = wchiAmount * burnFee / BASIS_POINTS;
+        actualBurn = wchiAmount * burnFee / AutoConvertLib.BASIS_POINTS;
         require (wchi.transferFrom (seller, burnReceiver, actualBurn),
                  "failed to transfer WCHI to burn receiver");
       }
@@ -431,8 +409,9 @@ contract AutoConvert is ERC2771Context, Ownable
            that the user passed in the right quote), and thus also prevents
            sandwich attacks.  */
         uint minFee = convertFee - slippageTolerance;
-        require (actualFee >= outputAmount * minFee / BASIS_POINTS,
-                 "slippage too high");
+        require (
+            actualFee >= outputAmount * minFee / AutoConvertLib.BASIS_POINTS,
+            "slippage too high");
         swapper.transferToken (outputToken, actualFee, feeReceiver);
       }
 
