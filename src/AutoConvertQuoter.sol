@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-// Copyright (C) 2025 Soccerverse Ltd
+// Copyright (C) 2025-2026 Soccerverse Ltd
 
 pragma solidity ^0.8.19;
 
 import "./AutoConvert.sol";
+import "./AutoConvertLib.sol";
 
 /**
  * @dev This is a helper contract that re-implements the quote* functions
@@ -15,6 +16,8 @@ import "./AutoConvert.sol";
  * the original contract deployed and won't need to migrate the orderbook
  * to a new one.
  *
+ * The quote logic itself is shared with AutoConvert through AutoConvertLib.
+ *
  * In case Democrit and AutoConvert are re-deployed in production, we can
  * get rid of the AutoConvertQuoter.
  */
@@ -24,20 +27,9 @@ contract AutoConvertQuoter
   /** @dev AutoConvert used to get config from.  */
   AutoConvert public immutable parent;
 
-  /** @dev The base denominator for the auto-convert fees (basis points).  */
-  uint public constant BASIS_POINTS = 10000;
-
   constructor (AutoConvert a)
   {
     parent = a;
-  }
-
-  /**
-   * @dev Helper function that adds a fee in basis points to a given amount.
-   */
-  function addFee (uint amount, uint bps) private pure returns (uint)
-  {
-    return amount * (BASIS_POINTS + bps) / BASIS_POINTS;
   }
 
   /**
@@ -48,19 +40,9 @@ contract AutoConvertQuoter
                            bytes calldata swapData)
       public returns (uint)
   {
-    uint totalRequired = addFee (wchiRequired, parent.burnFee ());
-    uint inputRequired = parent.swapper ().quoteExactOutput (
-                            inputToken, totalRequired, swapData);
-    return addFee (inputRequired, parent.convertFee ());
-  }
-
-  /**
-   * @dev Helper function that removes a fee in basis points from a given
-   * total amount.
-   */
-  function removeFee (uint amount, uint bps) private pure returns (uint)
-  {
-    return amount * (BASIS_POINTS - bps) / BASIS_POINTS;
+    return AutoConvertLib.quoteMarketBuy (parent.swapper (), inputToken,
+                                          wchiRequired, parent.burnFee (),
+                                          parent.convertFee (), swapData);
   }
 
   /**
@@ -71,11 +53,10 @@ contract AutoConvertQuoter
                             bytes calldata swapData)
       public returns (uint)
   {
-    uint wchiForSwap = removeFee (wchiReceived, parent.burnFee ());
-    uint output = parent.swapper ().quoteExactInput (
-                    wchiForSwap, outputToken, swapData);
-
-    return removeFee (output, parent.convertFee ());
+    return AutoConvertLib.quoteMarketSell (parent.swapper (), wchiReceived,
+                                           parent.burnFee (),
+                                           parent.convertFee (), outputToken,
+                                           swapData);
   }
 
 }

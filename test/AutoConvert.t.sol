@@ -136,13 +136,21 @@ contract AutoConvertTest is DemocritTest
 
   /**
    * @dev Configures the AutoConvert contract with the given fee rates for
-   * burn and convert.
+   * burn and convert, as well as the given slippage tolerance.
    */
-  function setFees (uint burn, uint convert)
-      internal
+  function setFeesWithSlippage (uint burn, uint convert, uint slippage) internal
   {
     vm.prank (admin);
-    autoconv.configure (swapper, burn, fee, convert, fee, 0);
+    autoconv.configure (swapper, burn, fee, convert, fee, slippage);
+  }
+
+  /**
+   * @dev Configures the AutoConvert contract with the given fee rates for
+   * burn and convert, using zero slippage tolerance.
+   */
+  function setFees (uint burn, uint convert) internal
+  {
+    setFeesWithSlippage (burn, convert, 0);
   }
 
   /* ************************************************************************ */
@@ -285,10 +293,13 @@ contract AutoConvertTest is DemocritTest
     assertEq (autoconv.quoteMarketBuy (usdc, 1e6, rate1000), 1010);
 
     setFees (0, 200);
-    assertEq (autoconv.quoteMarketBuy (usdc, 1e6, rate1000), 1020);
+    assertEq (autoconv.quoteMarketBuy (usdc, 1e6, rate1000), 1021);
 
     setFees (100, 200);
-    assertEq (autoconv.quoteMarketBuy (usdc, 1e6, rate1000), 1030);
+    assertEq (autoconv.quoteMarketBuy (usdc, 1e6, rate1000), 1031);
+
+    setFees (0, 500);
+    assertEq (autoconv.quoteMarketBuy (usdc, 1e6, rate1000), 1053);
   }
 
   function test_marketBuyFailsWhenNotReady () public
@@ -351,6 +362,20 @@ contract AutoConvertTest is DemocritTest
     assertEq (usdc.balanceOf (fee), 0);
   }
 
+  function test_marketBuyQuotedAmountWithoutSlippage () public
+  {
+    setFeesWithSlippage (0, 500, 0);
+    uint quote = autoconv.quoteMarketBuy (usdc, 1e6, rate1000);
+    assertEq (quote, 1053);
+
+    vm.prank (buyer);
+    autoconv.marketBuy (usdc, quote, 1e6, rate1000, marketBuy);
+
+    assertEq (wchi.balanceOf (seller), 1e6);
+    assertEq (usdc.balanceOf (buyer), 1e6 - quote);
+    assertEq (usdc.balanceOf (fee), 53);
+  }
+
   function test_marketBuyGoodSlippage () public
   {
     setFees (0, 0);
@@ -379,7 +404,7 @@ contract AutoConvertTest is DemocritTest
     assertEq (usdc.balanceOf (buyer), 1e6 - quote);
 
     assertEq (wchi.balanceOf (fee), 20e3);
-    assertEq (usdc.balanceOf (fee), 41);
+    assertEq (usdc.balanceOf (fee), 44);
   }
 
   function test_marketBuyInvalidEthPayments () public
@@ -426,6 +451,9 @@ contract AutoConvertTest is DemocritTest
 
     setFees (100, 200);
     assertEq (autoconv.quoteMarketSell (usdc, 1e6, rate1000), 970);
+
+    setFees (0, 500);
+    assertEq (autoconv.quoteMarketSell (usdc, 1e6, rate1000), 952);
   }
 
   function test_marketSellFailsWhenNotReady () public
@@ -502,6 +530,19 @@ contract AutoConvertTest is DemocritTest
     assertEq (usdc.balanceOf (fee), 0);
   }
 
+  function test_marketSellQuotedAmountWithoutSlippage () public
+  {
+    setFeesWithSlippage (0, 500, 0);
+    uint quote = autoconv.quoteMarketSell (usdc, 1e6, rate1000);
+    assertEq (quote, 952);
+
+    vm.prank (seller);
+    autoconv.marketSell (usdc, quote, 1e6, rate1000, marketSell);
+
+    assertEq (usdc.balanceOf (seller), quote);
+    assertEq (usdc.balanceOf (fee), 48);
+  }
+
   function test_marketSellGoodSlippage () public
   {
     /* The existing amount of WCHI of the seller should be left alone.  */
@@ -537,7 +578,7 @@ contract AutoConvertTest is DemocritTest
     assertEq (wchi.balanceOf (buyer), 0);
 
     assertEq (wchi.balanceOf (fee), 20e3);
-    assertEq (usdc.balanceOf (fee), 39);
+    assertEq (usdc.balanceOf (fee), 37);
   }
 
   function test_marketSellUnwrapsEth () public
